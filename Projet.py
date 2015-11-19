@@ -109,6 +109,99 @@ def genGraph(M,N,A):
     return G
 
 
+def add_edge(self, u, v, key=None, attr_dict=None, **attr):
+        """Add an edge between u and v.
+
+        The nodes u and v will be automatically added if they are
+        not already in the graph.
+
+        Edge attributes can be specified with keywords or by providing
+        a dictionary with key/value pairs.  See examples below.
+
+        Parameters
+        ----------
+        u,v : nodes
+            Nodes can be, for example, strings or numbers.
+            Nodes must be hashable (and not None) Python objects.
+        key : hashable identifier, optional (default=lowest unused integer)
+            Used to distinguish multiedges between a pair of nodes.
+        attr_dict : dictionary, optional (default= no attributes)
+            Dictionary of edge attributes.  Key/value pairs will
+            update existing data associated with the edge.
+        attr : keyword arguments, optional
+            Edge data (or labels or objects) can be assigned using
+            keyword arguments.
+
+        See Also
+        --------
+        add_edges_from : add a collection of edges
+
+        Notes
+        -----
+        To replace/update edge data, use the optional key argument
+        to identify a unique edge.  Otherwise a new edge will be created.
+
+        NetworkX algorithms designed for weighted graphs cannot use
+        multigraphs directly because it is not clear how to handle
+        multiedge weights.  Convert to Graph using edge attribute
+        'weight' to enable weighted graph algorithms.
+
+        Examples
+        --------
+        The following all add the edge e=(1,2) to graph G:
+
+        >>> G = nx.MultiDiGraph()
+        >>> e = (1,2)
+        >>> G.add_edge(1, 2)           # explicit two-node form
+        >>> G.add_edge(*e)             # single edge as tuple of two nodes
+        >>> G.add_edges_from( [(1,2)] ) # add edges from iterable container
+
+        Associate data to edges using keywords:
+
+        >>> G.add_edge(1, 2, weight=3)
+        >>> G.add_edge(1, 2, key=0, weight=4)   # update data for key=0
+        >>> G.add_edge(1, 3, weight=7, capacity=15, length=342.7)
+        """
+        # set up attribute dict
+        if attr_dict is None:
+            attr_dict = attr
+        else:
+            try:
+                attr_dict.update(attr)
+            except AttributeError:
+                raise NetworkXError(
+                    "The attr_dict argument must be a dictionary.")
+        # add nodes
+        if u not in self.succ:
+            self.succ[u] = self.adjlist_dict_factory()
+            self.pred[u] = self.adjlist_dict_factory()
+            self.node[u] = {}
+        if v not in self.succ:
+            self.succ[v] = self.adjlist_dict_factory()
+            self.pred[v] = self.adjlist_dict_factory()
+            self.node[v] = {}
+        if v in self.succ[u]:
+            keydict = self.adj[u][v]
+            if key is None:
+                # find a unique integer key
+                # other methods might be better here?
+                key = len(keydict)
+                while key in keydict:
+                    key += 1
+            datadict = keydict.get(key, self.edge_key_dict_factory())
+            datadict.update(attr_dict)
+            keydict[key] = datadict
+        else:
+            # selfloops work this way without special treatment
+            if key is None:
+                key = 0
+            datadict = self.edge_attr_dict_factory()
+            datadict.update(attr_dict)
+            keydict = self.edge_key_dict_factory()
+            keydict[key] = datadict
+            self.succ[u][v] = keydict
+            self.pred[v][u] = keydict
+
 ################################################################################################################
 #                                   DJIKSTRA
 ################################################################################################################
