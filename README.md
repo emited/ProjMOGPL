@@ -16,3 +16,6 @@ git commit -a
 
 #Pusher les fichiers sur le repo
 git push
+
+git config --global http.proxy http://proxy_username:proxy_password@proxy_ip:port
+git config --global https.proxy https://proxy_username:proxy_password@proxy_ip:port
