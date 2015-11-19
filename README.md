@@ -1,7 +1,7 @@
 # ProjMOGPL
 
 #Récupération repo :
-git clone https://github.com/hippunk/ProjMOGPL
+git clone https://github.com/emited/ProjMOGPL
 
 #Mise a jour repo :
 git pull
