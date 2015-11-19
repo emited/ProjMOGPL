@@ -45,8 +45,8 @@ def readfile(filename):
 #                                   CREATION & GESTION DU GRAPHE
 ################################################################################################################
 
-def genGraph(M,N,A):
-    G=nx.DiGraph()
+def genGraph(M,N,A): #genere le graphe en fonction du tableau d'obstacles
+    G=DiGr()
     for i in range(M+1):
         for j in range(N+1):
             if(A[i][j]==0 and A[i][j-1]==0 and A[i-1][j]==0 and A[i-1][j-1]==0):
@@ -73,7 +73,7 @@ def genGraph(M,N,A):
                 
                 #Deplacement
                 #Nord/Haut
-                if (A!=1): #Teste la présence d'obstacle
+                if (A!=1): #Teste la presence d'obstacle
                     if(i>=3):
                         G.add_edge(str(i)+str(j)+'1',str(i-3)+str(j)+'1',direct='a3',weight=1)
                     if(i>=2):
@@ -108,7 +108,7 @@ def genGraph(M,N,A):
                 
     return G
 
-class DG(nx.MultiDiGraph):   
+class DiGr(nx.MultiDiGraph): #redefinition de la methode add_edge au sein de la classe MultiDiGraph
 
     def add_edge(self, u, v, key=None, attr_dict=None, **attr):
             """Add an edge between u and v.
@@ -203,8 +203,68 @@ class DG(nx.MultiDiGraph):
                 self.succ[u][v] = keydict
                 self.pred[v][u] = keydict
 
+
+
 ################################################################################################################
-#                                   DJIKSTRA
+#                                   AFFICHAGE DU GRAPHE
+################################################################################################################
+
+def fixed_pos(G): #Assigne des positions aux noeuds du graphe
+    fixed_pos={}
+    for n in G.nodes():
+        if(n[2]=='1'):
+            fixed_pos[n]=(int(n[1])*4+1,int(n[0])*4)
+        if(n[2]=='2'):
+            fixed_pos[n]=(int(n[1])*4+2,int(n[0])*4+1)
+        if(n[2]=='3'):
+            fixed_pos[n]=(int(n[1])*4+1,int(n[0])*4+2)
+        if(n[2]=='4'):
+            fixed_pos[n]=(int(n[1])*4,int(n[0])*4+1)        
+    return fixed_pos
+    
+def draw_network(G,pos,ax,sg=None): #Genere l'affichage du graphe
+    for n in G:
+        c=Circle(pos[n],radius=0.15,alpha=0.5)
+        ax.add_patch(c)
+        G.node[n]['patch']=c
+        x,y=pos[n]
+    seen={}
+    for (u,v,d) in G.edges(data=True):
+        n1=G.node[u]['patch']
+        n2=G.node[v]['patch']
+        rad=0.2
+        if (u,v) in seen:
+            rad=seen.get((u,v))
+            rad=(rad+np.sign(rad)*0.1)*-1
+        alpha=0.5
+        color='k'
+        e = FancyArrowPatch(n1.center,n2.center,patchA=n1,patchB=n2,
+                            arrowstyle='-|>',
+                            connectionstyle='arc3,rad=%s'%rad,
+                            mutation_scale=10.0,
+                            lw=2,
+                            alpha=alpha,
+                            color=color)
+        seen[(u,v)]=rad
+        ax.add_patch(e)
+    return e
+
+def show_network(G): # affiche le graphe
+    fig=plt.figure(figsize=(10,10))
+    ax=plt.subplot(111)
+    ax.invert_yaxis()
+    draw_network(G,fixed_pos(G),ax)
+    ax.autoscale()
+    plt.axis('equal')
+    plt.axis('off')
+    plt.show()
+    #plt.savefig("graph.pdf")
+    #nx.draw_networkx(G,fixed_pos,ax=axe,arrows=True,node_size=400,font_size=10)
+    #nx.draw(G,fixed_pos(G),ax=axe)
+
+
+################################################################################################################
+#                                   BFS
 ################################################################################################################
 
 ################################################################################################################
