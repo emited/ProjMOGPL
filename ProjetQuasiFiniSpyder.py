@@ -21,8 +21,6 @@ import time
 #                                   GENERATION ALEATOIRE D'INSTANCES
 ################################################################################################################
 
-from random import choice
-
 #M : nombre de lignes
 #N : nombre de colonnes
 #nb_obstacles : nombre d'obstacles
@@ -45,8 +43,8 @@ def gen_rand_instance(M,N,nb_obstacles):
 
 #Renvoie les positions de départ et d'arrivée à PARTIR D'UN GRAPHE DEJA CREE (!!)
 def gen_rand_positions(G):
-    startPos=choice(G.nodes())
-    endPos=choice(G.nodes())
+    startPos=np.random.choice(G.nodes())
+    endPos=np.random.choice(G.nodes())
     return startPos,endPos
 
 ################################################################################################################
