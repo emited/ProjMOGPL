@@ -361,7 +361,7 @@ def Gen_inst_perf(X,N,nb_obstacles,nom_fichier) :
         
     return
 
-Fonction Gen_Inst_perf un peu inutile vu le codage de la suivante
+#Fonction Gen_Inst_perf un peu inutile vu le codage de la suivante
 
 #Gen_inst_perf(10,10,10,'entree_test.txt')
    
