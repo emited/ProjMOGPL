@@ -1,0 +1,25 @@
+
+On peut modéliser le problème avec un graphe orienté G=(V,E). 
+L'ensemble des nœuds représente l'ensemble des positions possibles du robots sur les rails du grand magasin, c'est à dire sa localisation sur la grille et son orientation. Sauf dans le cas des bords, un quadruplet de nœud n'existe que si le croisement correspondant sur le grillage ne touche aucun obstacle.
+
+Il existe un arc entre le nœud A et le nœud B si et seulement si le robot peut passer de la position correspondant au nœud A à la position correspondant au nœud B en une et une seule commande.
+
+Choix d'implémentation :
+Nous avons décider de développer le programme en Python pour faciliter la gestion de la mémoire et les listes. Nous avions aussi connaissances des librairies : , facilitant la création, la gestion des graphes ainsi que l'affichage.
+
+
+Complexité de notre méthode :
+- Etape 0 : Entrée des paramètres/Interface
+→ coût : 
+- Etape 1 : Lecture d'un bloc
+→ coût : 
+- Etape 2 : Création du graphe correspondant
+→ coût :
+- Etape 3 : Calcul du plus court chemin (Parcours en largeur)
+→ coût : 
+- Etape 4 : Traçage du plus court chemin calculé précédemment (BFS)
+→ coût : 
+- Etape 5 : Affichage du résultat
+→ coût : 
+Ces 6 étapes sont répétées à chaque bloc.
+La complexité d'un tel algorithme est O( )
