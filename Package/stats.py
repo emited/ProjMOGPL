@@ -1,0 +1,207 @@
+# Package: Projet MOGPL: la balade du robot
+
+# Sportich Benjamin, de Bezenac Emmanuel
+
+# ##  PERFORMANCE
+
+import time
+from inst_gen import *
+import numpy as np
+#Genere X instances pour une grille de taille NxN avec nb_obstacles obstacles
+#Ecrit ces X instances dans nom_fichier
+def Gen_inst_perf(X,N,nb_obstacles,nom_fichier) : 
+    mod='w'    
+    for i in range(X) :
+        
+        #creation de l'instance
+        t0=time.time()
+        A=gen_rand_instance(N,N,nb_obstacles)
+        t1=time.time()
+        print '\nGen Instance :'+str((t1-t0))
+        G=gen_graph(A)
+        
+        #t2=time.time()
+        Pos=gen_rand_positions(G)
+        #t3=time.time()
+        #print '\nGen Rand Pos:'+str(t3-t2)        
+        
+        #ecriture dans le fichier
+        write_entry_file(nom_fichier,A,Pos[0],Pos[1],Pos[0][2],mod)   ##DOUTE
+        
+        mod='a'
+        
+    return
+
+#Fonction Gen_Inst_perf un peu inutile vu le codage de la suivante
+
+#Gen_inst_perf(10,10,10,'entree_test.txt')
+   
+#Mesure :
+#   - temps de generation d'instance aleatoire des caracteristiques donnees
+#   - temps de generation du graphe correspondant
+#   - temps de calcul du chemin
+#Retourne le tableau des temps des calculs du chemin
+ #Genere X instances pour une grille de taille NxN avec nb_obstacles obstacles
+#Ecrit ces X instances dans nom_fichier_entree
+#Ecrit le resultat dans nom_fichier_sortie
+def MesureTemps(X,N,nb_obstacles,nom_fichier_entree,nom_fichier_sortie):
+    
+    tab=[]
+    tab2=[]
+    mod='w'
+    #Generation des instances
+    #Gen_inst_perf(X,N,nb_obstacles,nom_fichier_entree)
+    
+    for i in range(X) :
+
+        #m,n,A,start,end=read_entry_file(nom_fichier_entree)
+        
+        #creation de l'instance
+        t0=time.time()
+        A=gen_rand_instance(N,N,nb_obstacles)
+        t1=time.time()
+        print '\nGen Instance :'+str((t1-t0))
+        G=gen_graph(A)
+        
+        #t2=time.time()
+        Pos=gen_rand_positions(G)
+        #t3=time.time()
+        #print '\nGen Rand Pos:'+str(t3-t2)
+        
+        #ecriture dans le fichier
+        write_entry_file(nom_fichier_entree,mod,A,Pos[0],Pos[1],Pos[0][2])   ##DOUTE        
+        start=Pos[0]
+        end=Pos[1]
+        
+    
+        
+        #Generation du graphe
+        t0=time.time()
+        G=gen_graph(A)
+        t1=time.time()
+        tab2.append(t1-t0)
+        
+        #Calcul
+        result=gen_shortest_path(start,end,G)
+        t2=time.time()
+        
+        #Affichage du chemin
+        #print result[:-1]
+        #show_interface(result,A,start,end)        
+        
+        #Ecriture du resultat        
+        write_result_file(nom_fichier_sortie,mod,result[:-1]) ####DOUTE
+        mod='a'
+        
+        print '\nGen Graph:'+str(t1-t0)
+        print '\nGen shortest path:'+str(t2-t1)+'\n'
+        tab.append(t2-t1)
+    
+    print '\nTotal time: '+str(sum(tab))
+    #return tab,result
+    return tab,tab2
+
+a,b=MesureTemps(10,50,10,'entrelol.txt','sortielol.txt')
+
+
+#X abscisse
+def grapheGen(X,tab,tab2) : 
+    fig=plt.figure(figsize=(10,10))
+    ax=plt.subplot(111)
+    y=tab
+    #x=np.arange(len(tab))
+    ten_plot=ax.plot(X,y,label='Creation du chemin en seconde(s)',linestyle='-',marker='o',color='r')
+    if tab2 :
+        y2=tab2
+        ten_plot=ax.plot(X,y2,label='Generation du graphe en seconde(s)',linestyle='-',marker='o',color='b')
+        
+    
+    plt.legend()
+    
+ 
+    
+    plt.show()
+
+grapheGen(range(10),a,[])
+
+
+# X : liste des tailles de la grille
+# nb_inst : nombre d'instances aleatoires generees pour chaque valeur
+#Pour chaque element de X : cree un fichier dentree et un fichier de sortie avec nb_inst blocs
+#dg=1 : Double graphe || dg=0 Graphe de la creation du chemin seulement
+def etudeTempsGrille(X,nb_inst,nom_fic_entree,nom_fic_sortie,dg) : 
+    tab=[]
+    tab2=[]
+    for i in X :
+        e2=nom_fic_entree+"Grille_"+str(i)
+        s2=nom_fic_sortie+"_Grille_"+str(i)
+        a,b=MesureTemps(nb_inst,i,i,e2,s2)
+                
+        a_moy=sum(a)
+        a_moy=a_moy/len(a)
+        tab.append(a_moy)
+        
+        b_moy=sum(b)
+        b_moy=b_moy/len(b)
+        tab2.append(b_moy)
+    
+    if dg==0 :
+        tab2=[]    
+    grapheGen(X,tab,tab2)
+
+etudeTempsGrille([10,20,30,40,50],10,'entree_','sortie_',1)
+
+# X : liste des nombres d'obstacles
+# nb_inst : nombre d'instances aleatoires generees pour chaque valeur
+#Pour chaque element de X : cree un fichier dentree et un fichier de sortie avec nb_inst blocs
+#dg=1 : Double graphe || dg=0 Graphe de la creation du chemin seulement
+def etudeTempsObstacle(X,taille_grille,nb_inst,nom_fic_entree,nom_fic_sortie,dg) :
+    tab=[]
+    tab2=[]
+    for i in X :
+        e2=nom_fic_entree+"Obst_"+str(i)
+        s2=nom_fic_sortie+"Obst_"+str(i)
+        a,b=MesureTemps(nb_inst,taille_grille,i,e2,s2)
+                
+        a_moy=sum(a)
+        a_moy=a_moy/len(a)
+        tab.append(a_moy)
+        
+        b_moy=sum(b)
+        b_moy=b_moy/len(b)
+        tab2.append(b_moy)
+    
+    if dg==0 :
+        tab2=[]
+    grapheGen(X,tab,tab2)
+
+etudeTempsObstacle([10,20,30,40,50],20,10,'entree','sortie_',1)
+
+
+# In[ ]:
+
+#Genere un tableau d'obstacles A a partir des parametres en entree
+def gen_interact_instance():
+    M=int(raw_input('Taille? (X*X) '))
+    A=np.zeros((M,M),dtype=int)
+    nb_obstacles=int(raw_input('\nNombre d\'obstacles? '))
+    obstacles=[]
+    if(nb_obstacles<=M*M-4):
+        #Generation d'obstacles
+        for i in range(nb_obstacles):
+            x_obstacle=int(raw_input('Ligne de l\obstacle \n? '))
+            y_obstacle=int(raw_input('Colonne de l\obstacle \n? '))
+            while((x_obstacle,y_obstacle) in obstacles): #Obstacle deja cree
+                print "Obstacle deja cree sur cette case."
+                print "Creer un autre"
+                x_obstacle=int(raw_input('Ligne de l\obstacle \n? '))
+                y_obstacle=int(raw_input('Colonne de l\obstacle \n? '))
+                    
+            A[x_obstacle][y_obstacle]=1
+            print "Obstacle "+str(i)+" sur "+str(nb_obstacles)+"places"
+            obstacles.append((x_obstacle,y_obstacle))        
+    else:
+        print 'Erreur, trop d\'obstacles.'
+        
+    return A
+
