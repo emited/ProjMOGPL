@@ -110,8 +110,6 @@ class Interface():
         self.gen_path_button.on_click(self._on_gen_path_button_click)
         
         self.gen_path_button.disabled=True            
-        plt.close()
-        plt.axis('off')
         self.fig=plt.figure(figsize=self.figsize)
         self.ax=self.fig.add_subplot(111)        
         
