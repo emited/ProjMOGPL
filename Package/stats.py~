@@ -6,6 +6,7 @@
 
 import time
 from inst_gen import *
+import numpy as np
 #Genere X instances pour une grille de taille NxN avec nb_obstacles obstacles
 #Ecrit ces X instances dans nom_fichier
 def Gen_inst_perf(X,N,nb_obstacles,nom_fichier) : 

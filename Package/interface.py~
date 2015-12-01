@@ -101,7 +101,6 @@ class Interface():
         self.inst_but_container.width = '100%'
         display(self.inst_but_container)
 
-
         self.show_path_button=Latex(value='Path: Value:  Actions:',margin=10)
         display(self.show_path_button)
 
@@ -110,19 +109,62 @@ class Interface():
         self.gen_pos_button.on_click(self._on_pos_button_click)
         self.gen_path_button.on_click(self._on_gen_path_button_click)
         
-        self.gen_path_button.disabled=True
-        self.gen_pos_button.disabled=True
-            
+        self.gen_path_button.disabled=True            
         plt.close()
-        #plt.axis('off')
+        plt.axis('off')
         self.fig=plt.figure(figsize=self.figsize)
-        self.ax=self.fig.add_subplot(111)
+        self.ax=self.fig.add_subplot(111)        
         
-
+        self.A=np.zeros((4,4),dtype='int')
+        self.replot_grid()        
+        
+        self.cid=self.fig.canvas.mpl_connect('button_press_event',self.onclick)
+        self.mod=False
+    
+    def replot_grid(self):
+        self.colors=['white','grey']
+        self.ax.set_ylim([0,self.A.shape[0]])
+        self.ax.set_xlim([0,self.A.shape[1]])
+        self.ax.set_axis_off()
+        self.tb = Table(self.ax, bbox=[0,0,1,1])
+        nrows, ncols = self.A.shape
+        self.width, self.height = 1.0 / ncols, 1.0 / nrows
+        # Add cells
+        for (i,j),val in np.ndenumerate(self.A):
+            color=self.colors[val]
+            self.tb.add_cell(i, j, self.width, self.height,loc='center', facecolor=color)
+        # Row Labels...
+        for i in range(self.A.shape[0]):
+            self.tb.add_cell(i, -1, self.width, self.height, text=i, loc='right', 
+                        edgecolor='none', facecolor='none')
+        # Column Labels
+        for j in range(self.A.shape[1]):
+            self.tb.add_cell(-1, j, self.width, self.height/2, text=j, loc='center', 
+                               edgecolor='none', facecolor='none')
+        self.ax.add_table(self.tb)
+        self.ax.invert_yaxis()
+        plt.draw()
+        
+    def onclick(self,event):
+        x,y = event.xdata, event.ydata
+        self.gen_pos_button.disabled=False
+        self.gen_path_button.disabled=True
+        
+        i=int(y)
+        j=int(x)
+        self.A[i][j]=1-self.A[i][j]
+        color=self.colors[self.A[i][j]]
+        self.tb.add_cell(i,j,self.width,self.height,loc='center', facecolor=color)
+        self.ax.add_table(self.tb)
+        self.mod=True
+        plt.draw()
+        
+    
     def _on_size_slider_change(self,name,value):
         self.nb_ob_slider.max=int(value)**2/2-4 #Constrain on number of obstacles
     
     def _on_gen_inst_button_click(self,b):
+        self.mod=False
         self.gen_path_button.disabled=True
         self.gen_pos_button.disabled=False
             
@@ -137,8 +179,7 @@ class Interface():
         
         self.A=gen_rand_instance(self.M,self.M,self.nb_ob)
         
-        self.G=gen_graph(self.A)
-               
+        self.G=gen_graph(self.A)               
         
         if hasattr(self, 'ax'):
         #    print self.ax
@@ -147,37 +188,15 @@ class Interface():
             del(self.start_circle)
             del(self.end_circle)
             del(self.arrow)
-
-
-        
-        colors=['white','grey']
-        self.ax.set_ylim([0,self.A.shape[0]])
-        self.ax.set_xlim([0,self.A.shape[1]])
-        self.ax.set_axis_off()
-        self.tb = Table(self.ax, bbox=[0,0,1,1])
-        nrows, ncols = self.A.shape
-        width, height = 1.0 / ncols, 1.0 / nrows
-        # Add cells
-        for (i,j),val in np.ndenumerate(self.A):
-            color=colors[val]
-            self.tb.add_cell(i, j, width, height,loc='center', facecolor=color)
-        # Row Labels...
-        for i in range(self.A.shape[0]):
-            self.tb.add_cell(i, -1, width, height, text=i, loc='right', 
-                        edgecolor='none', facecolor='none')
-        # Column Labels
-        for j in range(self.A.shape[1]):
-            self.tb.add_cell(-1, j, width, height/2, text=j, loc='center', 
-                               edgecolor='none', facecolor='none')
-        self.ax.add_table(self.tb)
-        self.ax.invert_yaxis()
-        #self.leg=self.ax.legend(bbox_to_anchor=(1.3, 1.05),fancybox=True)
-        #self.leg.get_frame().set_alpha(0.5)
-        #self.ax.legend()
-        plt.show()
-
+            
+        self.replot_grid()        
         
     def _on_pos_button_click(self,b):
+        if hasattr(self, 'G')==False:
+            self.G=gen_graph(self.A)
+        if(self.mod==True):
+            self.G=gen_graph(self.A)
+            self.mod=False
         for line in self.ax.lines:
             line.set_visible(False)
             del(line)
@@ -222,7 +241,7 @@ class Interface():
             self.leg=self.ax.legend(bbox_to_anchor=(1.1, 1.05),fancybox=True)
             self.leg.get_frame().set_alpha(0.5)
         
-        plt.show()
+        plt.draw()
         
 
         
@@ -236,11 +255,9 @@ class Interface():
         for i,j in self.result[2]:
             self.ax.add_line(lines.Line2D((i[1],j[1]),(i[0],j[0]),linewidth=3,zorder=1,clip_on=False))
         plt.draw()
-        
-        
-        
-        
-        
+
+
+i=Interface(figsize=(8,8))       
         
         
         
@@ -294,9 +311,9 @@ def draw_graph(G,pos,ax,sg=None): #Genere l'affichage du graphe
         ax.add_patch(e)
     return e
 
-def show_graph(G): # affiche le graphe
-    fig=plt.figure(figsize=(10,10))
-    ax=plt.subplot(111)
+def show_graph(G,figsize=(7,7)): # affiche le graphe
+    fig=plt.figure(figsize=figsize)
+    ax=fig.add_subplot(111)
     ax.invert_yaxis()
     draw_graph(G,fixed_pos(G),ax)
     ax.autoscale()

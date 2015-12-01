@@ -1,0 +1,28 @@
+from inst_gen import *
+from interface import *
+from stats import *
+
+
+#On peut creer des instances aleatoires avec Gen_inst_perf(X,N,nb_obstacles,nom_fichier) 
+def mainLect(filename):
+    tab=read_entry_file(filename)    
+    mod='w'
+    for i in range() :
+        m,n,A,start,end=tab[i]
+        t0=time.time()        
+        
+        G=gen_graph(A)
+        t1=time.time()    
+    
+        result=gen_shortest_path(start,end,G)
+        t2=time.time()
+       
+        print result[:-1]
+        f=show_interface(result,A,start,end)
+        write_result_file('resultat_test.txt',mod,result[:2])
+        
+        print '\nGen Graph:'+str(t1-t0)
+        print '\nGen shortest path:'+str(t2-t1)
+        print 'Total Time:'+str(t2-t0)
+        mod='a'
+    print 'Overall'+str(t2)
